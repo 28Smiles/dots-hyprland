@@ -81,6 +81,12 @@ const Utilities = () => Box({
                 App.toggleWindow('osk');
             }
         }),
+        UtilButton({
+            name: 'Windows 11 VM', icon: 'window', onClicked: () => {
+                const openViewer = () => Utils.execAsync(['/usr/bin/virt-viewer', '--connect', 'qemu:///system', 'win11']).catch(print);
+                Utils.execAsync(['/usr/bin/virsh', '--connect', 'qemu:///system', 'start', 'win11']).then(openViewer).catch(openViewer);
+            }
+        }),
     ]
 })
 
