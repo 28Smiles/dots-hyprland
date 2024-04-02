@@ -13,8 +13,12 @@ yay -Suy virtio
 sudo systemctl enable libvirtd
 sudo systemctl start libvirtd
 
+printf "Copy Configs...\n"
 mv $HOME/Downloads/tiny11b1.iso /var/lib/libvirt/images/tiny11.iso
-mv ./win11-libvirt.xml /etc/libvirt/qemu/win11.xml
+envsubst < ./win11-libvirt.xml > /etc/libvirt/qemu/win11.xml
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/win11.qcow2 32G
+mkdir $HOME/win11
+
+printf "Startup VM...\n"
 sudo virsh start win11
 sudo -E virt-viewer win11
