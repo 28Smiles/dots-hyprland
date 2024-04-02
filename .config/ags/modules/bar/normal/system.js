@@ -1,13 +1,15 @@
 // This is for the right pills of the bar. 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-const { Box, Label, Button, Overlay, Revealer, Scrollable, Stack, EventBox } = Widget;
+const { Box, Label, Button, Overlay, Revealer, Scrollable, Stack, EventBox, Icon } = Widget;
 const { exec, execAsync } = Utils;
 const { GLib } = imports.gi;
 import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../../.commondata/weather.js';
+
+import { hasWin11VM } from '../../.miscutils/system.js';
 
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
@@ -81,12 +83,22 @@ const Utilities = () => Box({
                 App.toggleWindow('osk');
             }
         }),
-        UtilButton({
-            name: 'Windows 11 VM', icon: 'windows-symbolic', onClicked: () => {
-                const openViewer = () => Utils.execAsync(['/usr/bin/virt-viewer', '--connect', 'qemu:///system', 'win11']).catch(print);
-                Utils.execAsync(['/usr/bin/virsh', '--connect', 'qemu:///system', 'start', 'win11']).then(openViewer).catch(openViewer);
-            }
-        }),
+        (() => {
+            if (!hasWin11VM) return null;
+            return Button({
+                vpack: 'center',
+                tooltipText: 'Windows 11 VM',
+                onClicked: () => {
+                    const openViewer = () => Utils.execAsync(['/usr/bin/virt-viewer', '--connect', 'qemu:///system', 'win11']).catch(print);
+                    Utils.execAsync(['/usr/bin/virsh', '--connect', 'qemu:///system', 'start', 'win11']).then(openViewer).catch(openViewer);
+                },
+                className: 'bar-util-btn txt-norm',
+                child: Icon({
+                    className: 'txt-norm',
+                    icon: 'windows-symbolic',
+                }),
+            })
+        })(),
     ]
 })
 
