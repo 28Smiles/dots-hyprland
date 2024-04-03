@@ -10,7 +10,7 @@ import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../../.commondata/weather.js';
 
-import { hasWin11VM } from '../../.miscutils/system.js';
+import { hasWin11VM, hasLazydocker } from '../../.miscutils/system.js';
 
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
@@ -104,6 +104,21 @@ const Utilities = () => Box({
                 child: Icon({
                     className: 'txt-norm',
                     icon: 'windows-symbolic',
+                }),
+            })
+        })(),
+        (() => {
+            if (!hasLazydocker) return null;
+            return Button({
+                vpack: 'center',
+                tooltipText: 'Lazydocker',
+                onClicked: () => {
+                    execAsync([`bash`, `-c`, `${userOptions.apps.terminal} fish -C "sudo lazydocker"`]).catch(print);
+                },
+                className: 'bar-util-btn txt-norm',
+                child: Icon({
+                    className: 'txt-norm',
+                    icon: 'docker-symbolic',
                 }),
             })
         })(),

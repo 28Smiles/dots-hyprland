@@ -8,6 +8,7 @@ export const isDebianDistro = (distroID == 'linuxmint' || distroID == 'ubuntu' |
 export const isArchDistro = (distroID == 'arch' || distroID == 'endeavouros' || distroID == 'cachyos');
 export const hasFlatpak = !!exec(`bash -c 'command -v flatpak'`);
 export const hasWin11VM = !!exec(`bash -c 'ls /var/lib/libvirt/images/win11.qcow2'`);
+export const hasLazydocker = !!exec(`bash -c 'command -v lazydocker'`);
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_cache_dir()}/ags/user/colormode.txt`;
 const colorMode = Utils.exec('bash -c "sed -n \'1p\' $HOME/.cache/ags/user/colormode.txt"');
