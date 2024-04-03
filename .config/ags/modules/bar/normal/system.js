@@ -4,6 +4,7 @@ import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { Box, Label, Button, Overlay, Revealer, Scrollable, Stack, EventBox, Icon } = Widget;
 const { exec, execAsync } = Utils;
 const { GLib } = imports.gi;
+import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
@@ -89,7 +90,14 @@ const Utilities = () => Box({
                 vpack: 'center',
                 tooltipText: 'Windows 11 VM',
                 onClicked: () => {
-                    const openViewer = () => Utils.execAsync(['/usr/bin/virt-viewer', '--connect', 'qemu:///system', 'win11']).catch(print);
+                    const openViewer = () => {
+                        const pid = Utils.exec(`pgrep -f '/usr/bin/virt-viewer --connect qemu:///system win11'`);
+                        if (!!pid) {
+                            Hyprland.messageAsync(`dispatch focuswindow pid:${pid}`).catch(print);
+                        } else {
+                            Utils.execAsync(['/usr/bin/virt-viewer', '--connect', 'qemu:///system', 'win11']).catch(print);
+                        }
+                    }
                     Utils.execAsync(['/usr/bin/virsh', '--connect', 'qemu:///system', 'start', 'win11']).then(openViewer).catch(openViewer);
                 },
                 className: 'bar-util-btn txt-norm',
