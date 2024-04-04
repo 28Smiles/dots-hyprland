@@ -61,13 +61,19 @@ export default () => Widget.EventBox({
                     Widget.Box({ hexpand: true }),
                     Widget.Box({
                         className: 'bar-sidemodule', hexpand: true,
-                        children: [Widget.Box({
-                            vertical: true,
-                            className: 'bar-space-button',
-                            children: [
-                                OptionalWindowTitleInstance,
-                            ]
-                        })]
+                        children: [
+                            Widget.Icon({
+                                className: 'txt-large',
+                                icon: 'arch-symbolic',
+                            }),
+                            Widget.Box({
+                                vertical: true,
+                                className: 'bar-space-button',
+                                children: [
+                                    OptionalWindowTitleInstance,
+                                ]
+                            })
+                        ]
                     }),
                 ]
             })
