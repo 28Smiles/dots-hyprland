@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+MEMORY=4194304
+CORES=4
+
 sudo pacman -Suy qemu python python-pip python-wheel
 git clone https://github.com/foxlet/macOS-Simple-KVM.git /tmp/macOS-Simple-KVM
 cd /tmp/macOS-Simple-KVM
@@ -26,6 +29,10 @@ sed -e "s|VMDIR/firmware/OVMF_CODE.fd|/var/lib/libvirt/qemu/nvram/macOS_CODE.fd|
     -e "s|VMDIR/BaseSystem.img|/var/lib/libvirt/images/macOS_catalina.img|g" \
     -e "s|MACHINE|$MACHINE|g" \
     -e "s|<name>macOS-Simple-KVM</name>|<name>macOS</name>|g" \
+    -e "s|<memory unit='KiB'>2097152</memory>|<memory unit='KiB'>$MEMORY</memory>|g" \
+    -s "s|<currentMemory unit='KiB'>2097152</currentMemory>|<currentMemory unit='KiB'>$MEMORY</currentMemory>|g" \
+    -s "s|<vcpu placement='static'>4</vcpu>|<vcpu placement='static'>$CORES</vcpu>|g" \
+    -s "s|<topology sockets='1' cores='4' threads='1'/>|<topology sockets='1' cores='$CORES' threads='1'/>|g" \
     -e "s|</devices>|<disk type='file' device='disk'><driver name='qemu' type='qcow2'/><source file='/var/lib/libvirt/images/macOS.qcow2'/><target dev='sdc' bus='sata'/><address type='drive' controller='0' bus='0' target='0' unit='2'/></disk></devices>|g" \
     tools/template.xml.in > macOS.xml
 virsh --connect qemu:///system define macOS.xml
