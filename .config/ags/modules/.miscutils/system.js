@@ -8,6 +8,7 @@ export const isDebianDistro = (distroID == 'linuxmint' || distroID == 'ubuntu' |
 export const isArchDistro = (distroID == 'arch' || distroID == 'endeavouros' || distroID == 'cachyos');
 export const hasFlatpak = !!exec(`bash -c 'command -v flatpak'`);
 export const hasWin11VM = !!exec(`bash -c 'virsh --connect qemu:///system dumpxml win11'`);
+export const hasMacOSVM = !!exec(`bash -c 'virsh --connect qemu:///system dumpxml macOS'`);
 export const hasLazydocker = !!exec(`bash -c 'command -v lazydocker'`);
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_cache_dir()}/ags/user/colormode.txt`;
