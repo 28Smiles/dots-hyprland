@@ -5,7 +5,6 @@ export default () => PopupWindow({
     keymode: 'exclusive',
     anchor: ['right', 'top', 'bottom'],
     name: 'sideright',
-    showClassName: 'sideright-show',
-    hideClassName: 'sideright-hide',
+    layer: 'overlay',
     child: SidebarRight(),
 });
