@@ -29,3 +29,5 @@ sed -e "s|VMDIR/firmware/OVMF_CODE.fd|/var/lib/libvirt/qemu/nvram/macOS_CODE.fd|
     -e "s|</devices>|<disk type='file' device='disk'><driver name='qemu' type='qcow2'/><source file='/var/lib/libvirt/images/macOS.qcow2'/><target dev='sdc' bus='sata'/><address type='drive' controller='0' bus='0' target='0' unit='2'/></disk></devices>|g" \
     tools/template.xml.in > macOS.xml
 virsh --connect qemu:///system define macOS.xml
+printf "Startup the VM and install MAC-OS\n"
+printf "For optimisations visit: https://github.com/sickcodes/osx-optimizer\n"
