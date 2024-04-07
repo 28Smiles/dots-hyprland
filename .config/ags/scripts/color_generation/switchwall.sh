@@ -28,14 +28,16 @@ fi
 apply_sddm_sugar() {
     if [ ! -f "/usr/share/sddm/themes/sugar-dark/Background.jpg" ]; then
         echo "SDDM theme not found. Skipping wallpaper change."
-    else
-        # Only jpg is supported by sddm
-        if [ "${imgpath: -4}" != ".jpg" ]; then
-            cat "$imgpath" > "/usr/share/sddm/themes/sugar-dark/Background.jpg"
-        else
-            echo "Cannot set wallpaper for SDDM. Only jpg is supported."
-        fi
+        return
     fi
+
+    # Only jpg is supported by sddm
+    if [ "${imgpath: -4}" != ".jpg" ]; then
+        echo "Cannot set wallpaper for SDDM. Only jpg is supported."
+        return
+    fi
+
+    cat "$imgpath" > "/usr/share/sddm/themes/sugar-dark/Background.jpg"
 }
 
 apply_sddm_sugar &

@@ -110,6 +110,8 @@ apply_sddm_sugar() {
     for i in "${!colorlist[@]}"; do
         sed -i "s/{{ ${colorlist[$i]} }}/${colorvalues[$i]#\#}/g" "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf
     done
+    sed -i "s/=True/=true/g" "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf
+    sed -i "s/=False/=false/g" "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf
 
     if [ ! -f "/usr/share/sddm/themes/sugar-dark/theme.conf" ]; then
         echo "SDDM theme not found. Skipping that."
