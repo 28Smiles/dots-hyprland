@@ -116,7 +116,7 @@ apply_sddm_sugar() {
         return
     fi
 
-    cp "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf /usr/share/sddm/themes/sugar-dark/theme.conf
+    cat "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf > /usr/share/sddm/themes/sugar-dark/theme.conf
 }
 
 apply_hyprlock() {
