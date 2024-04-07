@@ -25,17 +25,17 @@ else
     --transition-pos "$cursorposx, $cursorposy_inverted"
 fi
 
-# Generate colors for ags n stuff
-"$HOME"/.config/ags/scripts/color_generation/colorgen.sh "${imgpath}" --apply --smart
-
 # Set sddm wallpaper
 if [ ! -f "/usr/share/sddm/themes/sugar-dark/Background.jpg" ]; then
     echo "SDDM theme not found. Skipping wallpaper change."
 else
     # Only jpg is supported by sddm
     if [ "${imgpath: -4}" != ".jpg" ]; then
-        cp "$imgpath" "/usr/share/sddm/themes/sugar-dark/Background.jpg"
+        cat "$imgpath" > "/usr/share/sddm/themes/sugar-dark/Background.jpg"
     else
         echo "Cannot set wallpaper for SDDM. Only jpg is supported."
     fi
 fi
+
+# Generate colors for ags n stuff
+"$HOME"/.config/ags/scripts/color_generation/colorgen.sh "${imgpath}" --apply --smart
