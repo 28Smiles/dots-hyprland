@@ -97,6 +97,28 @@ apply_hyprland() {
     cp "$HOME"/.cache/ags/user/generated/hypr/hyprland/colors.conf "$HOME"/.config/hypr/hyprland/colors.conf
 }
 
+apply_sddm_sugar() {
+    # Check if scripts/templates/sddm-sugar-dark/theme.conf exists
+    if [ ! -f "scripts/templates/sddm-sugar-dark/theme.conf" ]; then
+        echo "Template file not found for SDDM Sugar Dark. Skipping that."
+        return
+    fi
+    # Copy template
+    mkdir -p "$HOME"/.cache/ags/user/generated/sddm-sugar-dark
+    cp "scripts/templates/sddm-sugar-dark/theme.conf" "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf
+    # Apply colors
+    for i in "${!colorlist[@]}"; do
+        sed -i "s/{{ ${colorlist[$i]} }}/${colorvalues[$i]#\#}/g" "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf
+    done
+
+    if [ ! -f "/usr/share/sddm/themes/sugar-dark/theme.conf" ]; then
+        echo "SDDM theme not found. Skipping that."
+        return
+    fi
+
+    cp "$HOME"/.cache/ags/user/generated/sddm-sugar-dark/theme.conf /usr/share/sddm/themes/sugar-dark/theme.conf
+}
+
 apply_hyprlock() {
     # Check if scripts/templates/hypr/hyprlock.conf exists
     if [ ! -f "scripts/templates/hypr/hyprlock.conf" ]; then
@@ -166,6 +188,7 @@ fi
 
 apply_ags &
 apply_hyprland &
+apply_sddm_sugar &
 apply_hyprlock &
 apply_gtk &
 apply_fuzzel &
