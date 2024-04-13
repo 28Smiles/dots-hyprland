@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 INSTALL_PATH=/usr/share/sddm/themes/sugar-dark
-sudo pacman -Suy weston
+sudo pacman -Suy weston qt5 qt5-quickcontrols2 qt5-svg
 sudo git clone https://github.com/28Smiles/sddm-sugar-dark.git $INSTALL_PATH
 [ getent group sddm-themes ] || sudo groupadd sddm-themes
 v sudo usermod -aG sddm-themes "$(whoami)"
