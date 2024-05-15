@@ -24,13 +24,22 @@
 <details> 
   <summary>Instructions</summary>
     
-   - Automatic, but guided and transparent, installation for Arch(-based) Linux:
+   - **Automatic**, but guided and transparent, installation for Arch(-based) Linux:
    ```bash
    bash <(curl -s "https://end-4.github.io/dots-hyprland-wiki/setup.sh")
    ```
-   - Manual installation, other distros and more:
+   - **Manual** installation, other distros and more:
      - See the [Wiki](https://end-4.github.io/dots-hyprland-wiki/en/i-i/01setup/)
      - (_Available in: English, Vietnamese, and Simplified Chinese. Translations are welcome._)
+    
+   - **Default keybinds**: Parts similar to Windows and GNOME. Hit Super+/ for a list.
+     <details> 
+       <summary>Here's an image, just in case:</summary>
+    
+       ![image](https://github.com/end-4/dots-hyprland/assets/97237370/4c3d27b4-9ac5-4e55-9cae-c5c1f497890f)
+
+     </details>
+
 </details>
 
 <details> 
@@ -46,8 +55,10 @@
 ![image](https://github.com/end-4/dots-hyprland/assets/97237370/5e081770-0f1e-45c4-ad9c-3d19f488cd85)
 
 **Fancy notifications, music controls, system, calendar**
-![image](https://github.com/end-4/dots-hyprland/assets/97237370/90c13b64-cde3-4363-9716-718d35845d95)
+![image](https://github.com/end-4/dots-hyprland/assets/97237370/406b72b6-fa38-4f0d-a6c4-4d7d5d5ddcb7)
+<!-- ![image](https://github.com/end-4/dots-hyprland/assets/97237370/90c13b64-cde3-4363-9716-718d35845d95) -->
 <!-- ![image](https://github.com/end-4/dots-hyprland/assets/97237370/9e7adedd-fae8-4cc8-9c81-d7ad489d7559) -->
+
 
 **Weeb powers**
 <!-- ![image](https://github.com/end-4/dots-hyprland/assets/97237370/98fe2c03-a128-45c0-8155-3a6080db3b84) -->
@@ -89,7 +100,8 @@
 ---
 
 ## Thank you
- - [@clsty](https://github.com/clsty) for major improvements to the install script and their other contributions
+ - [@clsty](https://github.com/clsty) for making an actually good install script + many other stuff that I neglect
+ - [@midn8hustlr](https://github.com/midn8hustlr) for greatly improving the color generation system
  - AGS: [Aylur's config](https://github.com/Aylur/dotfiles), [kotontrion's config](https://github.com/kotontrion/dotfiles)
  - EWW: [fufexan's config](https://github.com/fufexan/dotfiles) (he thanks more people there btw)
  - AI bots for providing useful examples

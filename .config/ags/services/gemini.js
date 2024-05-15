@@ -11,7 +11,7 @@ const HISTORY_FILENAME = `gemini.txt`;
 const HISTORY_PATH = HISTORY_DIR + HISTORY_FILENAME;
 const initMessages =
     [
-        { role: "user", parts: [{ text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with very brief explanation for each command\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\" for the interface to render it properly. Use casual language and be short and concise. \nThanks!" }], },
+        { role: "user", parts: [{ text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don’t have enough information to provide a confident answer, simply say “I don’t know” or “I’m not sure.”. \nThanks!" }], },
         { role: "model", parts: [{ text: "Got it!" }], },
         { role: "user", parts: [{ text: "\"He rushed to where the event was supposed to be hold, he didn't know it got calceled\"" }], },
         { role: "model", parts: [{ text: "## Grammar correction\nErrors:\n\"He rushed to where the event was supposed to be __hold____,__ he didn't know it got calceled\"\nCorrection + minor improvements:\n\"He rushed to the place where the event was supposed to be __held____, but__ he didn't know that it got calceled\"" }], },
@@ -62,11 +62,11 @@ class GeminiMessage extends Service {
 
     _role = '';
     _parts = [{ text: '' }];
-    _thinking = false;
+    _thinking;
     _done = false;
     _rawData = '';
 
-    constructor(role, content, thinking = false, done = false) {
+    constructor(role, content, thinking = true, done = false) {
         super();
         this._role = role;
         this._parts = [{ text: content }];
@@ -97,8 +97,8 @@ class GeminiMessage extends Service {
     get label() { return this._parserState.parsed + this._parserState.stack.join('') }
 
     get thinking() { return this._thinking }
-    set thinking(thinking) {
-        this._thinking = thinking;
+    set thinking(value) {
+        this._thinking = value;
         this.notify('thinking')
         this.emit('changed')
     }
@@ -116,7 +116,7 @@ class GeminiMessage extends Service {
 
     parseSection() {
         if (this._thinking) {
-            this._thinking = false;
+            this.thinking = false;
             this._parts[0].text = '';
         }
         const parsedData = JSON.parse(this._rawData);
@@ -273,12 +273,12 @@ class GeminiService extends Service {
     }
 
     addMessage(role, message) {
-        this._messages.push(new GeminiMessage(role, message));
+        this._messages.push(new GeminiMessage(role, message, false));
         this.emit('newMsg', this._messages.length - 1);
     }
 
     send(msg) {
-        this._messages.push(new GeminiMessage('user', msg));
+        this._messages.push(new GeminiMessage('user', msg, false));
         this.emit('newMsg', this._messages.length - 1);
         const aiResponse = new GeminiMessage('model', 'thinking...', true, false)
 
@@ -326,4 +326,3 @@ class GeminiService extends Service {
 }
 
 export default new GeminiService();
-

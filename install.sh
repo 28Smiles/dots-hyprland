@@ -101,6 +101,20 @@ case $SKIP_HYPR_AUR in
     ;;
 esac
 
+# https://github.com/end-4/dots-hyprland/issues/428#issuecomment-2081690658
+# https://github.com/end-4/dots-hyprland/issues/428#issuecomment-2081701482
+# https://github.com/end-4/dots-hyprland/issues/428#issuecomment-2081707099
+pymyc=(python-materialyoucolor-git gradience-git python-libsass python-material-color-utilities)
+case $SKIP_PYMYC_AUR in
+  true) sleep 0;;
+  *)
+    if $ask;then
+      v $AUR_HELPER -S --answerclean=a ${pymyc[@]}
+    else
+      v $AUR_HELPER -S --answerclean=a --noconfirm ${pymyc[@]}
+    fi
+    ;;
+esac
 
 ## Optional dependencies
 if pacman -Qs ^plasma-browser-integration$ ;then SKIP_PLASMAINTG=true;fi
@@ -122,7 +136,8 @@ case $SKIP_PLASMAINTG in
     ;;
 esac
 
-v sudo usermod -aG video,input "$(whoami)"
+v sudo usermod -aG video,i2c,input "$(whoami)"
+v bash -c "echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf"
 v systemctl --user enable ydotool --now
 
 #####################################################################################
@@ -183,7 +198,7 @@ fi
 if $ask_MicroTeX;then showfun install-MicroTeX;v install-MicroTeX;fi
 
 #####################################################################################
-printf "\e[36m[$0]: 3. Copying\e[0m\n"
+printf "\e[36m[$0]: 3. Copying + Configuring\e[0m\n"
 
 # In case some folders does not exists
 v mkdir -p "$HOME"/.{config,cache,local/{bin,share}}
@@ -261,6 +276,9 @@ esac
 # since the files here come from different places, not only about one program.
 v rsync -av ".local/bin/" "$HOME/.local/bin/"
 
+# Dark mode by default
+v gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
 # Prevent hyprland from not fully loaded
 sleep 1
 try hyprctl reload
@@ -289,4 +307,3 @@ case $existed_hypr_conf in
      printf "\e[33mPlease use \"~/.config/hypr/hyprland.conf.new\" as a reference for a proper format.\e[0m\n"
      printf "\e[33mIf this is your first time installation, you must overwrite \"~/.config/hypr/hyprland.conf\" with \"~/.config/hypr/hyprland.conf.new\".\e[0m\n"
 ;;esac
-
