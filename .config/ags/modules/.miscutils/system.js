@@ -11,8 +11,8 @@ export const hasWin11VM = !!exec(`bash -c 'virsh --connect qemu:///system dumpxm
 export const hasMacOSVM = !!exec(`bash -c 'virsh --connect qemu:///system dumpxml macOS'`);
 export const hasLazydocker = !!exec(`bash -c 'command -v lazydocker'`);
 
-const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_cache_dir()}/ags/user/colormode.txt`;
-const colorMode = Utils.exec('bash -c "sed -n \'1p\' $HOME/.cache/ags/user/colormode.txt"');
+const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
+const colorMode = Utils.exec(`bash -c "sed -n '1p' '${LIGHTDARK_FILE_LOCATION}'"`);
 export let darkMode = Variable(!(Utils.readFile(LIGHTDARK_FILE_LOCATION).split('\n')[0].trim() == 'light'));
 export const hasPlasmaIntegration = !!Utils.exec('bash -c "command -v plasma-browser-integration-host"');
 

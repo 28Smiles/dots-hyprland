@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+CONFIG_DIR="$XDG_CONFIG_HOME/ags"
+
 if [ "$1" == "--noswitch" ]; then
     imgpath=$(swww query | head -1 | awk -F 'image: ' '{print $2}')
     # imgpath=$(ags run-js 'wallpaper.get(0)')
@@ -45,4 +48,4 @@ apply_sddm_sugar() {
 apply_sddm_sugar &
 
 # Generate colors for ags n stuff
-"$HOME"/.config/ags/scripts/color_generation/colorgen.sh "${imgpath}" --apply --smart
+"$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${imgpath}" --apply --smart
