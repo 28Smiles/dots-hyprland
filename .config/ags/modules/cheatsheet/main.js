@@ -88,12 +88,13 @@ const SheetContent = (id) => {
 }
 
 export default (id) => {
+    const sheets = SheetContent(id);
     const widgetContent = Widget.Box({
         vertical: true,
         className: "cheatsheet-bg spacing-v-5",
         children: [
             CheatsheetHeader(),
-            SheetContent(id),
+            sheets,
         ]
     });
     return PopupWindow({
@@ -117,10 +118,28 @@ export default (id) => {
                 clickCloseRegion({ name: 'cheatsheet' }),
             ],
             setup: (self) => self.on('key-press-event', (widget, event) => { // Typing
+                // Whole sheet
                 if (checkKeybind(event, userOptions.keybinds.cheatsheet.nextTab))
-                    sheetContents[id].nextTab();
+                    sheetContents.forEach(tab => tab.nextTab())
                 else if (checkKeybind(event, userOptions.keybinds.cheatsheet.prevTab))
-                    sheetContents[id].prevTab();
+                    sheetContents.forEach(tab => tab.prevTab())
+                else if (checkKeybind(event, userOptions.keybinds.cheatsheet.cycleTab))
+                    sheetContents.forEach(tab => tab.cycleTab())
+                // Keybinds
+                if (sheets.attribute.names[sheets.attribute.shown.value] == 'Keybinds') { // If Keybinds tab is focused
+                    if (checkKeybind(event, userOptions.keybinds.cheatsheet.keybinds.nextTab)) {
+                        sheetContents.forEach((sheet) => {
+                            const toSwitchTab = sheet.attribute.children[sheet.attribute.shown.value];
+                            toSwitchTab.nextTab();
+                        })
+                    }
+                    else if (checkKeybind(event, userOptions.keybinds.cheatsheet.keybinds.prevTab)) {
+                        sheetContents.forEach((sheet) => {
+                            const toSwitchTab = sheet.attribute.children[sheet.attribute.shown.value];
+                            toSwitchTab.prevTab();
+                        })
+                    }
+                }
             })
         })
     });

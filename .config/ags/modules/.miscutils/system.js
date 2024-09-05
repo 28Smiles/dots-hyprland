@@ -12,8 +12,15 @@ export const hasMacOSVM = !!exec(`bash -c 'virsh --connect qemu:///system dumpxm
 export const hasLazydocker = !!exec(`bash -c 'command -v lazydocker'`);
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
-const colorMode = Utils.exec(`bash -c "sed -n '1p' '${LIGHTDARK_FILE_LOCATION}'"`);
-export let darkMode = Variable(!(Utils.readFile(LIGHTDARK_FILE_LOCATION).split('\n')[0].trim() == 'light'));
+export const darkMode = Variable(!(Utils.readFile(LIGHTDARK_FILE_LOCATION).split('\n')[0].trim() == 'light'));
+darkMode.connect('changed', ({ value }) => {
+    let lightdark = value ? "dark" : "light";
+    execAsync([`bash`, `-c`, `mkdir -p ${GLib.get_user_state_dir()}/ags/user && sed -i "1s/.*/${lightdark}/"  ${GLib.get_user_state_dir()}/ags/user/colormode.txt`])
+        .then(execAsync(['bash', '-c', `${App.configDir}/scripts/color_generation/switchcolor.sh`]))
+        .then(execAsync(['bash', '-c', `command -v darkman && darkman set ${lightdark}`])) // Optional darkman integration
+        .catch(print);
+});
+globalThis['darkMode'] = darkMode;
 export const hasPlasmaIntegration = !!Utils.exec('bash -c "command -v plasma-browser-integration-host"');
 
 export const getDistroIcon = () => {

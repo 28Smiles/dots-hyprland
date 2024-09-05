@@ -2,6 +2,8 @@
 # This script updates the dotfiles by fetching the latest version from the Git repository and then replacing files
 # that have not been modified by the user to preserve changes. The remaining files will be replaced with the new ones.
 
+source ./scriptdata/environment-variables
+
 set -euo pipefail
 cd "$(dirname "$0")"
 export base="$(pwd)"
@@ -16,7 +18,7 @@ MAGENTA="\033[0;35m"
 RESET="\033[0m"
 
 # Define paths to update
-folders=(".config" ".local")
+folders=(".config" ".local/bin" ".local/share" ".local/state")
 excludes=(".config/hypr/custom" ".config/ags/user_options.js" ".config/hypr/hyprland.conf")
 
 get_checksum() {
@@ -36,6 +38,27 @@ file_in_excludes() {
     return 1
 }
 
+get_destination() {
+	# Get the correct destination of the file based on XDG base dirs
+	local file="$1"
+	local localdir="$(echo $file | cut -d/ -f1-2)"
+	local everything_else="$(echo $file | cut -d/ -f3-)"
+	# Check if path is config
+	if [ "$(echo $file | cut -d/ -f1)" = ".config" ]; then
+		printf "$XDG_CONFIG_HOME/$(echo $file | cut -d/ -f2-)"
+
+	# Local directory
+	elif [ "$localdir" = ".local/bin" ]; then
+		printf "$XDG_BIN_HOME/$everything_else"
+	
+	# There are no files in either of the following right now, but putting it here just in case as .local was specified
+	elif [ "$localdir" = ".local/share" ]; then
+		printf "$XDG_DATA_HOME/$everything_else"
+	elif [ "$localdir" = ".local/state" ]; then
+		printf "$XDG_STATE_HOME/$everything_else"
+	fi
+}
+
 # Greetings!
 cat << 'EOF'
 ###################################################################################################
@@ -44,7 +67,7 @@ cat << 'EOF'
 |                                                                                                 |
 |  This script will update your dotfiles (.config, .local, etc) by retrieving the latest version  |
 |  from the Git repository and then replacing the old config files with the updated ones.         |
-|  To preserve your customizations, it will ask you if you wanna keep some  modified              |
+|  To preserve your customizations, it will ask you if you wanna keep some customized             |
 |  files untouched.                                                                               |
 |                                                                                                 |
 ###################################################################################################
@@ -63,31 +86,31 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 # fetch the latest version of the repository
 if ! git fetch; then
-    echo -e "${RED}Failed to fetch the latest version of the repository. Exiting.${RESET}"
+    echo -e "${RED}Failed to fetch the latest version of the repository. Exiting...${RESET}"
     exit 1
 fi
 
 # Check if there are any changes
 if [[ $(git rev-list HEAD...origin/"$current_branch" --count) -eq 0 ]]; then
-    echo -e "${GREEN}Repository is already up-to-date. Do not run git pull before this script. Exiting.${RESET}"
+    echo -e "${GREEN}Repository is already up-to-date. Do not run git pull before this script. Exiting...${RESET}"
     exit 0
 fi
-echo -e "${CYAN}Excluding files and folders: ${excludes[@]}${RESET}"
+echo -e "${CYAN}Excluding files and folders that remain untouched:${RESET} ${excludes[@]}"
 
-# Then check which files have been modified by the user since the last update to preserve user configurations
+# Then check which files have been customized by the user since the last update to preserve user configurations
 modified_files=()
 
 # Find all files in the specified folders and their subfolders
 while IFS= read -r -d '' file; do
     # If the file is not in the home directory, skip it
-    if [[ ! -f "$HOME/$file" ]] || file_in_excludes "$file"; then
+    if [[ ! -f "$(get_destination $file)" ]] || file_in_excludes "$file"; then
         echo -e "${YELLOW}Skipping $file${RESET}"
         continue
     fi
     
     # Calculate checksums
     base_checksum=$(get_checksum "$base/$file")
-    home_checksum=$(get_checksum "$HOME/$file")
+    home_checksum=$(get_checksum "$(get_destination $file)")
     
     # Compare checksums and add to modified_files if necessary
     if [[ $base_checksum != $home_checksum ]]; then
@@ -99,12 +122,12 @@ echo
 
 # Output all modified files
 if [[ ${#modified_files[@]} -gt 0 ]]; then
-    echo -e "${MAGENTA}The following files have been modified since the last update:${RESET}"
+    echo -e "${MAGENTA}Customized Files detected: ${RESET}The following files have been customized by you or your system:"
     for file in "${modified_files[@]}"; do
         echo -e "${BLUE}$file${RESET}"
     done
 else
-    read -rp "No files found that have been modified since the last update. All files will be replaced. Are you sure you want to continue? [Y/n] " REPLY
+    read -rp "${YELLOW}No files detected that have been customized since the last update. All files will be replaced. Are you sure you want to continue? [Y/n] ${RESET}" REPLY
     echo
     if [[ $REPLY =~ ^[Nn]$ ]]; then
         echo -e "${RED}Exiting.${RESET}"
@@ -158,7 +181,7 @@ case $REPLY in
         fi
     ;;
     *)
-        echo -e "${GREEN}Keeping every modified file${RESET}"
+        echo -e "${GREEN}Keeping every customized file${RESET}"
     ;;
 esac
 
@@ -174,38 +197,112 @@ if ! git pull; then
     
     mkdir -p ./cache
     temp_folder=$(mktemp -d -p ./cache)
-    git clone https://github.com/end-4/dots-hyprland/ --depth=1 "$temp_folder"
+    git clone --branch "$current_branch" https://github.com/end-4/dots-hyprland/ --depth=1 "$temp_folder"
     # Replace the existing dotfiles with the new ones
     for folder in "${folders[@]}"; do
         find "$temp_folder/$folder" -print0 | while IFS= read -r -d '' file; do
             file=${file//$temp_folder\//}
             if [[ -d "$temp_folder/$file" ]]; then
-                mkdir -p "$HOME/$file"
+                mkdir -p "$(get_destination $file)"
             fi
             if [[ -f "$temp_folder/$file" ]] && ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
-                destination="$HOME/$file"
+                destination=$(get_destination $file)
                 echo -e "${BLUE}Replacing $destination ...${RESET}"
                 mkdir -p "$(dirname "$destination")"
                 cp -f "$temp_folder/$file" "$destination"
             fi
         done
     done
-    echo -e "${GREEN}New dotfiles have been copied. Cleaning up temporary folder.${RESET}"
+    
+    deleted_files=()
+    renamed_files=()
+    
+    # Extract deleted files and save to variable
+    deleted_files=$(git diff --name-status HEAD origin/$current_branch | awk '$1 == "D" {print $2}')
+    
+    # Extract renamed files and save to variable
+    renamed_files=$(git diff --name-status HEAD origin/$current_branch | awk '$1 ~ /^R/ {print $2}')
+    
+    
+    files_to_remove=()
+    
+    for file in $deleted_files; do
+        
+        if ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
+            files_to_remove+=("$file")
+        fi
+    done
+    for file in $renamed_files; do
+        if ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
+            files_to_remove+=("$file")
+        fi
+    done
+    
+    # Remove files
+    for file in "${files_to_remove[@]}"; do
+        echo -e "${YELLOW}Removing $file ...${RESET}"
+	homefile="$(get_destination $file)"
+        if [[ -f "$homefile" ]]; then
+            rm -rf "$homefile"
+        fi
+    done
+    
+    echo -e "${GREEN}New dotfiles have been copied. Cleaning up temporary folder...${RESET}"
     rm -rf "$temp_folder"
+    echo -e "${GREEN}Done. You may exit now.${RESET}"
     exit 0
 fi
+
+
+# Check git diff to determine which files have been removed and which have been renamed
+deleted_files=()
+renamed_files=()
+
+# Extract deleted files and save to variable
+deleted_files=$(git diff --name-status @{1} | awk '$1 == "D" {print $2}')
+
+# Extract renamed files and save to variable
+renamed_files=$(git diff --name-status @{1} | awk '$1 ~ /^R/ {print $2}')
+
+
+files_to_remove=()
+
+for file in $deleted_files; do
+    
+    if ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
+        files_to_remove+=("$file")
+    fi
+done
+for file in $renamed_files; do
+    if ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
+        files_to_remove+=("$file")
+    fi
+done
+
+# Remove files
+for file in "${files_to_remove[@]}"; do
+    echo -e "${YELLOW}Removing $file ...${RESET}"
+    homefile=$(get_destination $file)
+    if [[ -f "$homefile" ]]; then
+        rm -rf "$homefile"
+    fi
+done
+
 
 # Replace unmodified files
 for folder in "${folders[@]}"; do
     find "$folder" -print0 | while IFS= read -r -d '' file; do
         if [[ -d "$file" ]]; then
-            mkdir -p "$HOME/$file"
+            mkdir -p "$(get_destination $file)"
         fi
         if [[ -f "$file" ]] && ! file_in_excludes "$file" && [[ ! " ${modified_files[*]} " =~ " $file " ]]; then
-            destination="$HOME/$file"
+            destination="$(get_destination $file)"
             echo -e "${BLUE}Replacing \"$destination\" ...${RESET}"
             mkdir -p "$(dirname "$destination")"
             cp -f "$base/$file" "$destination"
         fi
     done
 done
+
+echo -e "${GREEN}Done. You may exit now.${RESET}"
+

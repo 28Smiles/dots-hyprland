@@ -262,13 +262,14 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
 }
 
 .sidebar-todo-txt {
-    margin: 0.341rem;
+    margin: 0.682rem;
     margin-bottom: 0rem;
 }
 
 .sidebar-todo-actions {
     margin: 0.341rem;
     margin-top: 0rem;
+    margin-right: 0rem;
 }
 
 .sidebar-todo-item-action {
@@ -991,4 +992,8 @@ $waifu_image_overlay_transparency: 0.7;
 
 .sidebar-centermodules-bottombar-button:active {
     background-color: $layer2Active;
+}
+
+.sidebar-centermodules-scrollgradient-bottom {
+    background: linear-gradient(to top, $layer1 0%, transparentize($layer1, 1) 1.023rem);
 }

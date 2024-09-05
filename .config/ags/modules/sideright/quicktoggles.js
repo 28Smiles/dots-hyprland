@@ -15,8 +15,9 @@ export const ToggleIconWifi = (props = {}) => Widget.Button({
     className: 'txt-small sidebar-iconbutton',
     tooltipText: 'Wifi | Right-click to configure',
     onClicked: () => Network.toggleWifi(),
-    onSecondaryClick: () => {
-        sidebarOptionsStack.focusName('Wifi networks')
+    onSecondaryClickRelease: () => {
+        execAsync(['bash', '-c', `${userOptions.apps.network}`]).catch(print);
+        closeEverything();
     },
     child: NetworkIndicator(),
     setup: (self) => {
@@ -222,19 +223,6 @@ export const ModuleIdleInhibitor = (props = {}) => Widget.Button({ // TODO: Make
     },
     ...props,
 });
-
-export const ModuleEditIcon = (props = {}) => Widget.Button({ // TODO: Make this work
-    ...props,
-    className: 'txt-small sidebar-iconbutton',
-    onClicked: () => {
-        execAsync(['bash', '-c', 'XDG_CURRENT_DESKTOP="gnome" gnome-control-center', '&']);
-        App.closeWindow('sideright');
-    },
-    child: MaterialIcon('edit', 'norm'),
-    setup: button => {
-        setupCursorHover(button);
-    }
-})
 
 export const ModuleReloadIcon = (props = {}) => Widget.Button({
     ...props,

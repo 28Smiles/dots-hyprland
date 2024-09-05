@@ -59,6 +59,7 @@ export default (monitor = 0) => {
         }, 'notify::screen-value'),
         progressSetup: (self) => self.hook(Brightness[monitor], (progress) => {
             const updateValue = Brightness[monitor].screen_value;
+            if (updateValue !== progress.value) Indicator.popup(1);
             progress.value = updateValue;
         }, 'notify::screen-value'),
     });
@@ -67,7 +68,7 @@ export default (monitor = 0) => {
         name: 'Volume',
         extraClassName: 'osd-volume',
         extraProgressClassName: 'osd-volume-progress',
-        attribute: { headphones: undefined },
+        attribute: { headphones: undefined , device: undefined},
         nameSetup: (self) => Utils.timeout(1, () => {
             const updateAudioDevice = (self) => {
                 const usingHeadphones = (Audio.speaker?.stream?.port)?.toLowerCase().includes('headphone');
@@ -82,11 +83,22 @@ export default (monitor = 0) => {
             Utils.timeout(1000, updateAudioDevice);
         }),
         labelSetup: (self) => self.hook(Audio, (label) => {
-            label.label = `${Math.round(Audio.speaker?.volume * 100)}`;
+            const newDevice = (Audio.speaker?.name);
+            const updateValue = Math.round(Audio.speaker?.volume * 100);
+            if (!isNaN(updateValue)) {
+                if (newDevice === volumeIndicator.attribute.device && updateValue != label.label) {
+                    Indicator.popup(1);
+                }
+            }
+            volumeIndicator.attribute.device = newDevice;
+            label.label = `${updateValue}`;
         }),
         progressSetup: (self) => self.hook(Audio, (progress) => {
             const updateValue = Audio.speaker?.volume;
-            if (!isNaN(updateValue)) progress.value = updateValue;
+            if (!isNaN(updateValue)) {
+                if (updateValue > 1) progress.value = 1;
+                else progress.value = updateValue;
+            }
         }),
     });
     return MarginRevealer({

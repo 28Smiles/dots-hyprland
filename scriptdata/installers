@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# This file is provided for non-Arch(based) distros.
+# As for Arch Linux, we use local PKGBUILDs or AUR packages, which is the "right" way compared to copying files directly into /usr/local/* .
+# P.S. install-yay() should be kept for Arch(based) distros.
+
 # This script depends on `functions' .
 # This is NOT a script for execution, but for loading functions, so NOT need execution permission.
 # NOTE that you NOT need to `cd ..' because the `$0' is NOT this file, but the script file which will source this file.
@@ -18,6 +22,7 @@ install-yay() {
   rm -rf /tmp/buildyay
 }
 
+# Not for Arch(based) distro.
 install-ags (){
   x mkdir -p $base/cache/ags
   x cd $base/cache/ags
@@ -26,11 +31,12 @@ install-ags (){
   x git pull origin main && git submodule update --init --recursive
   x git checkout 05e0f23534fa30c1db2a142664ee8f71e38db260
   x npm install
-  x meson setup build --reconfigure
+  x meson setup build # --reconfigure
   x meson install -C build
   x cd $base
 }
 
+# Not for Arch(based) distro.
 install-Rubik (){
   x mkdir -p $base/cache/Rubik
   x cd $base/cache/Rubik
@@ -46,6 +52,7 @@ install-Rubik (){
   x cd $base
 }
 
+# Not for Arch(based) distro.
 install-Gabarito (){
   x mkdir -p $base/cache/Gabarito
   x cd $base/cache/Gabarito
@@ -60,6 +67,7 @@ install-Gabarito (){
   x cd $base
 }
 
+# Not for Arch(based) distro.
 install-OneUI (){
   x mkdir -p $base/cache/OneUI4-Icons
   x cd $base/cache/OneUI4-Icons
@@ -74,6 +82,7 @@ install-OneUI (){
   x cd $base
 }
 
+# Not for Arch(based) distro.
 install-bibata (){
   x mkdir -p $base/cache/bibata-cursor
   x cd $base/cache/bibata-cursor
@@ -87,6 +96,7 @@ install-bibata (){
   x cd $base
 }
 
+# Not for Arch(based) distro.
 install-MicroTeX (){
   x mkdir -p $base/cache/MicroTeX
   x cd $base/cache/MicroTeX
@@ -97,8 +107,8 @@ install-MicroTeX (){
   x cd build
   x cmake ..
   x make -j32
-	x sudo mkdir -p /usr/local/bin
-  x sudo cp ./LaTeX /usr/local/bin/
-  x sudo cp -r ./res /usr/local/bin/
+	x sudo mkdir -p /opt/MicroTeX
+  x sudo cp ./LaTeX /opt/MicroTeX/
+  x sudo cp -r ./res /opt/MicroTeX/
   x cd $base
 }

@@ -58,7 +58,7 @@ export const Bar = async (monitor = 0) => {
                 SideModule([System()]),
             ]
         }),
-        endWidget: Indicators(),
+        endWidget: Indicators(monitor),
     });
     const focusedBarContent = Widget.CenterBox({
         className: 'bar-bg-focus',
@@ -77,11 +77,14 @@ export const Bar = async (monitor = 0) => {
         endWidget: Widget.Box({}),
         setup: (self) => {
             self.hook(Battery, (self) => {
-                if(!Battery.available) return;
+                if (!Battery.available) return;
                 self.toggleClassName('bar-bg-focus-batterylow', Battery.percent <= userOptions.battery.low);
             })
         }
     });
+    const nothingContent = Widget.Box({
+        className: 'bar-bg-nothing',
+    })
     return Widget.Window({
         monitor,
         name: `bar${monitor}`,
@@ -95,9 +98,10 @@ export const Bar = async (monitor = 0) => {
             children: {
                 'normal': normalBarContent,
                 'focus': focusedBarContent,
+                'nothing': nothingContent,
             },
             setup: (self) => self.hook(currentShellMode, (self) => {
-                self.shown = currentShellMode.value;
+                self.shown = currentShellMode.value[monitor];
             })
         }),
     });

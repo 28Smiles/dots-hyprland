@@ -15,7 +15,7 @@ import { hasWin11VM, hasMacOSVM, hasLazydocker } from '../../.miscutils/system.j
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
 
-const BatBatteryProgress = () => {
+const BarBatteryProgress = () => {
     const _updateProgress = (circprog) => { // Set circular progress value
         circprog.css = `font-size: ${Math.abs(Battery.percent)}px;`
 
@@ -31,16 +31,27 @@ const BatBatteryProgress = () => {
     })
 }
 
+const time = Variable('', {
+    poll: [
+        userOptions.time.interval,
+        () => GLib.DateTime.new_now_local().format(userOptions.time.format),
+    ],
+})
+
+const date = Variable('', {
+    poll: [
+        userOptions.time.dateInterval,
+        () => GLib.DateTime.new_now_local().format(userOptions.time.dateFormatLong),
+    ],
+})
+
 const BarClock = () => Widget.Box({
     vpack: 'center',
     className: 'spacing-h-4 bar-clock-box',
     children: [
         Widget.Label({
             className: 'bar-time',
-            label: GLib.DateTime.new_now_local().format(userOptions.time.format),
-            setup: (self) => self.poll(userOptions.time.interval, label => {
-                label.label = GLib.DateTime.new_now_local().format(userOptions.time.format);
-            }),
+            label: time.bind(),
         }),
         Widget.Label({
             className: 'txt-norm txt-onLayer1',
@@ -48,10 +59,7 @@ const BarClock = () => Widget.Box({
         }),
         Widget.Label({
             className: 'txt-smallie bar-date',
-            label: GLib.DateTime.new_now_local().format(userOptions.time.dateFormatLong),
-            setup: (self) => self.poll(userOptions.time.dateInterval, (label) => {
-                label.label = GLib.DateTime.new_now_local().format(userOptions.time.dateFormatLong);
-            }),
+            label: date.bind(),
         }),
     ],
 });
@@ -163,7 +171,7 @@ const BarBattery = () => Box({
         Label({
             className: 'txt-smallie',
             setup: (self) => self.hook(Battery, label => {
-                label.label = `${Battery.percent}%`;
+                label.label = `${Number.parseFloat(Battery.percent.toFixed(1))}%`;
             }),
         }),
         Overlay({
@@ -180,7 +188,7 @@ const BarBattery = () => Box({
                 }),
             }),
             overlays: [
-                BatBatteryProgress(),
+                BarBatteryProgress(),
             ]
         }),
     ]
@@ -225,11 +233,11 @@ const BatteryModule = () => Stack({
                                 .catch(print);
                             const weatherCode = weather.current_condition[0].weatherCode;
                             const weatherDesc = weather.current_condition[0].weatherDesc[0].value;
-                            const temperature = weather.current_condition[0].temp_C;
-                            const feelsLike = weather.current_condition[0].FeelsLikeC;
+                            const temperature = weather.current_condition[0][`temp_${userOptions.weather.preferredUnit}`];
+                            const feelsLike = weather.current_condition[0][`FeelsLike${userOptions.weather.preferredUnit}`];
                             const weatherSymbol = WEATHER_SYMBOL[WWO_CODE[weatherCode]];
                             self.children[0].label = weatherSymbol;
-                            self.children[1].label = `${temperature}℃ • Feels like ${feelsLike}℃`;
+                            self.children[1].label = `${temperature}°${userOptions.weather.preferredUnit} • Feels like ${feelsLike}°${userOptions.weather.preferredUnit}`;
                             self.tooltipText = weatherDesc;
                         }).catch((err) => {
                             try { // Read from cache
@@ -238,11 +246,11 @@ const BatteryModule = () => Stack({
                                 );
                                 const weatherCode = weather.current_condition[0].weatherCode;
                                 const weatherDesc = weather.current_condition[0].weatherDesc[0].value;
-                                const temperature = weather.current_condition[0].temp_C;
-                                const feelsLike = weather.current_condition[0].FeelsLikeC;
+                                const temperature = weather.current_condition[0][`temp_${userOptions.weather.preferredUnit}`];
+                                const feelsLike = weather.current_condition[0][`FeelsLike${userOptions.weather.preferredUnit}`];
                                 const weatherSymbol = WEATHER_SYMBOL[WWO_CODE[weatherCode]];
                                 self.children[0].label = weatherSymbol;
-                                self.children[1].label = `${temperature}℃ • Feels like ${feelsLike}℃`;
+                                self.children[1].label = `${temperature}°${userOptions.weather.preferredUnit} • Feels like ${feelsLike}°${userOptions.weather.preferredUnit}`;
                                 self.tooltipText = weatherDesc;
                             } catch (err) {
                                 print(err);
